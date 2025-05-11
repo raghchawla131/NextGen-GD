@@ -1,8 +1,13 @@
 import React from 'react'
+import Container from './Container'
 
-const Footer = () => {
+const Footer : React.FC = () => {
   return (
-    <div>Footer</div>
+    <>
+      <Container>
+        footer
+      </Container>
+    </>
   )
 }
 
