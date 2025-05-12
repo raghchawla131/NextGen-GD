@@ -3,12 +3,12 @@ import { Home, Sparkles, Info, Mail } from "lucide-react"
 export const NavItems = [
   {
     title: "Home",
-    url: "#",
+    url: "/",
     icon: Home,
   },
   {
-    title: "Features",
-    url: "#",
+    title: "Start Simulation",
+    url: "/setup",
     icon: Sparkles,
   },
   {

@@ -7,6 +7,8 @@ import {
 } from "react-router-dom";
 import GeneralLayout from './layout/GeneralLayout';
 import Home from './pages/Home';
+import Simulation from './pages/Simulation';
+import Setup from './pages/Setup';
 
 function App() {
 
@@ -20,7 +22,12 @@ function App() {
           element: <Home />
         },
         {
-
+          path: '/setup',
+          element: <Setup />
+        },
+        {
+          path: '/simulation/:time',
+          element: <Simulation />
         }
       ]
     }
