@@ -1,5 +1,3 @@
-import React from 'react'
-
 const NavLinks = () => {
   return (
     <div className="space-x-6 text-foreground font-medium">
