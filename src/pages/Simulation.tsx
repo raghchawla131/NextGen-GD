@@ -1,5 +1,7 @@
 import Container from '@/components/layout/Container'
+import Avatar from '@/components/simulation/Avatar';
 import GreenLine from '@/components/simulation/GreenLine'
+import Timer from '@/components/simulation/Timer';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom'
 
@@ -25,10 +27,11 @@ const Simulation = () => {
   }, [timeLeft])
   
   return (
-    <>
+    <> 
       <GreenLine timeLeft={timeLeft} duration={parsedTime} />
       <Container>
-        simulation
+        <Timer timeLeft={timeLeft} />
+        <Avatar imgSrc={'/src/assets/28638-removebg-preview.png'} />
       </Container>
     </>
   )
