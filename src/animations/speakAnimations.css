@@ -1,17 +1,4 @@
-/* barsAnimation.css */
-#bars {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 20px;
-}
-
 .bar {
-  background: #52467b;
-  height: 3px;
-  width: 10px;
-  margin: 0px 4px;
-  border-radius: 5px;
   animation: sound 0ms -600ms linear infinite alternate;
 }
 
@@ -31,4 +18,3 @@
 .bar:nth-child(3) { animation-duration: 407ms; }
 .bar:nth-child(4) { animation-duration: 458ms; }
 .bar:nth-child(5) { animation-duration: 400ms; }
-

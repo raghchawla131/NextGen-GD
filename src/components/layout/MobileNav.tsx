@@ -8,7 +8,7 @@ import MySidebar from './MySidebar';
 const MobileNav: React.FC = () => {
   return (
     <SidebarProvider>
-      <nav className="w-full py-4 bg-background border-b">
+      <nav className="w-full py-4 bg-background shadow-sm border-b h-fit">
         <Container>
           <div className="flex justify-between items-center">
             <div className="text-xl font-bold text-foreground">NextGen GD</div>
@@ -20,13 +20,14 @@ const MobileNav: React.FC = () => {
               {/* <ModeToggle /> */}
 
               <SidebarTrigger />
+              <MySidebar />
             </div>
           </div>
         </Container>
       </nav>
       
       {/* Sidebar will automatically handle visibility */}
-      <MySidebar />
+      
     </SidebarProvider>
   );
 };
