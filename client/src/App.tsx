@@ -9,6 +9,8 @@ import GeneralLayout from './layout/GeneralLayout';
 import Home from './pages/Home';
 import Simulation from './pages/Simulation';
 import Setup from './pages/Setup';
+import About from './pages/About';
+import Contact from './pages/Contact';
 
 function App() {
 
@@ -28,7 +30,15 @@ function App() {
         {
           path: '/simulation/:time',
           element: <Simulation />
-        }
+        },
+        {
+          path: '/about',
+          element: <About />
+        },
+        {
+          path: '/contact',
+          element: <Contact />
+        },
       ]
     }
   ])

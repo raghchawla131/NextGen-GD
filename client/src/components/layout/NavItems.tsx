@@ -13,12 +13,12 @@ export const NavItems = [
   },
   {
     title: "About",
-    url: "#",
+    url: "/about",
     icon: Info,
   },
   {
     title: "Contact",
-    url: "#",
+    url: "/contact",
     icon: Mail,
   },
 ]
