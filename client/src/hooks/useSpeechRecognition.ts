@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
 
 // Type fixes
 type SpeechRecognition = any;
@@ -11,12 +11,12 @@ declare global {
 }
 
 export const useSpeechRecognition = (isActive: boolean) => {
-  const [transcript, setTranscript] = useState('');
+  const [transcript, setTranscript] = useState("");
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
   useEffect(() => {
-    if (!('webkitSpeechRecognition' in window)) {
-      console.warn('Speech Recognition not supported');
+    if (!("webkitSpeechRecognition" in window)) {
+      console.warn("Speech Recognition not supported");
       return;
     }
 
@@ -24,7 +24,7 @@ export const useSpeechRecognition = (isActive: boolean) => {
     const recognition = new SpeechRecognition();
     recognition.continuous = false;
     recognition.interimResults = false;
-    recognition.lang = 'en-US';
+    recognition.lang = "en-US";
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
       const result = event.results[0][0].transcript;
@@ -32,7 +32,7 @@ export const useSpeechRecognition = (isActive: boolean) => {
     };
 
     recognition.onerror = (event: any) => {
-      console.error('Speech recognition error:', event.error);
+      console.error("Speech recognition error:", event.error);
     };
 
     recognitionRef.current = recognition;
@@ -43,7 +43,7 @@ export const useSpeechRecognition = (isActive: boolean) => {
     if (!recognition) return;
 
     if (isActive) {
-      setTranscript('');
+      setTranscript("");
       recognition.start();
     } else {
       recognition.stop();

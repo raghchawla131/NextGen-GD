@@ -3,7 +3,6 @@ import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
 dotenv.config();
 
-console.log("GEMINI_API_KEY =", process.env.GEMINI_API_KEY);
 const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
 export const callGeminiAPI = async (promptText: string): Promise<string> => {

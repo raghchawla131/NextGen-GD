@@ -15,7 +15,7 @@ const Avatar = ({ imgSrc }: { imgSrc: string }) => {
         </div>
         <div className=" absolute -bottom-6">
 
-        <SpeakAnimation />
+          {/* <SpeakAnimation /> */}
         </div>
       </div>
     </div>
