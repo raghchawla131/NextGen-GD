@@ -48,6 +48,12 @@ const Simulation = () => {
   // Function to handle text-to-speech
   useTextToSpeech(botResponse);
 
+  useEffect(() => {
+    // Cancel speech synthesis on every route change
+    window.speechSynthesis.cancel();
+    setBotResponse(null);
+  }, [location.pathname]);
+
   // Handle the case when the mic is turned off
   useEffect(() => {
     if (!micOn && prevMicOn.current === true) {
@@ -75,7 +81,7 @@ const Simulation = () => {
       window.speechSynthesis.cancel();
       setBotResponse(null);
     }
-  }, [micOn])
+  }, [micOn]);
 
   useEffect(() => {
     if (userText.trim() !== '') {
@@ -87,11 +93,10 @@ const Simulation = () => {
   useEffect(() => {
     if (gdStarter === 'bot' && gdTopic) {
       const introPrompt = `Start a group discussion on "${gdTopic}". Speak like a real person, keep it natural and simple, under 40 words. Just give a brief opening statement like a participant would, no extra details.`;
-      console.log(introPrompt);
 
       const selectRandomBot = Math.floor(Math.random() * bots.length);
       setCurrentlyActiveBot(selectRandomBot);
-      sendTextToGeminiForResponse(introPrompt);
+      setUserText(introPrompt);
     }
   }, [gdStarter, gdTopic]);
 
@@ -153,7 +158,6 @@ Bot:`;
           <BotManager
             bots={bots}
             currentlyActiveBot={currentlyActiveBot}
-            botResponse={botResponse}
           />
         </div>
         <ChatHistory history={chatHistory} />

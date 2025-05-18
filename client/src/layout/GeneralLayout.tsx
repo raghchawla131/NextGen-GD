@@ -1,10 +1,15 @@
 import Footer from "@/components/layout/Footer";
 import MobileNav from "@/components/layout/MobileNav";
 import Navbar from "@/components/layout/Navbar";
-import React from "react";
-import { Outlet } from "react-router";
+import React, { useEffect } from "react";
+import { Outlet, useLocation } from "react-router";
 
 const GeneralLayout: React.FC = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    window.speechSynthesis.cancel();
+  }, [location.pathname]);
   return (
     <>
         {/* mobile nav */}
