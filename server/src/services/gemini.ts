@@ -1,6 +1,10 @@
 import { GoogleGenAI } from "@google/genai";
 
-const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+import dotenv from "dotenv";
+dotenv.config();
+
+console.log("GEMINI_API_KEY =", process.env.GEMINI_API_KEY);
+const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
 export const callGeminiAPI = async (promptText: string): Promise<string> => {
   try {
@@ -13,11 +17,11 @@ export const callGeminiAPI = async (promptText: string): Promise<string> => {
       ],
     });
 
-    // Response's text is inside `candidates[0].content.parts[0].text`
-    const text = response?.text ?? "No response from gemini";
+    // response.text contains the generated text
+    const text = response.text ?? "No response from Gemini API";
     return text;
   } catch (error) {
     console.error("Gemini API Error:", error);
-    throw error;
+    return "Error generating response.";
   }
 };
