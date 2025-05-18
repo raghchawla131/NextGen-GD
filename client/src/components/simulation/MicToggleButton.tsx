@@ -1,4 +1,3 @@
-// src/components/simulation/MicToggleButton.tsx
 import { Mic, MicOff } from 'lucide-react';
 
 interface MicToggleButtonProps {
@@ -25,3 +24,4 @@ const MicToggleButton: React.FC<MicToggleButtonProps> = ({ micOn, toggleMic }) =
 };
 
 export default MicToggleButton;
+  

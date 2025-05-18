@@ -8,6 +8,6 @@ interface GeminiResponse {
 export const generateFromGemini = (prompt: string): Promise<AxiosResponse<GeminiResponse>> => {
   return axios.post<GeminiResponse>(
     `http://localhost:8001/gemini/generate`,
-    { prompt: `${prompt}` } // send as JSON object
+    { prompt: `${prompt} under 30 words` }
   );
 };
