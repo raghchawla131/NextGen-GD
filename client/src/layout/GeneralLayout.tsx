@@ -17,7 +17,7 @@ const GeneralLayout: React.FC = () => {
         {/* desktop nav */}
         <div className=" hidden md:block"><Navbar /></div>
         <Outlet />
-        {/* <Footer /> */}
+        <Footer />
     </>
   )
 }

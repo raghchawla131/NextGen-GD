@@ -115,7 +115,9 @@ const Simulation = () => {
     let voices = synth.getVoices();
     const preferredVoice = voices.find(v => v.name === "Google US English");
 
-    const utterance = new SpeechSynthesisUtterance(botResponse);
+    const sanitizedResponse = botResponse.replace(/[*_`~]/g, '');
+    const utterance = new SpeechSynthesisUtterance(sanitizedResponse);
+
     utterance.voice = preferredVoice || null;
     utterance.pitch = 1;
     utterance.rate = 1;

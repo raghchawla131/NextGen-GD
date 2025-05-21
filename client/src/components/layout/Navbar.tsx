@@ -1,5 +1,5 @@
 import { Button } from '../ui/button'
-import { ModeToggle } from '../theme/mode-toggle'
+// import { ModeToggle } from '../theme/mode-toggle'
 import Container from './Container'
 import { NavItems } from './NavItems'
 
@@ -25,7 +25,7 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            <ModeToggle />
+            {/* <ModeToggle /> */}
             <Button>Login</Button>
           </div>
         </div>

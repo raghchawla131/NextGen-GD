@@ -6,7 +6,7 @@ const MySidebar = () => {
     <Sidebar>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
+          <SidebarGroupLabel>NextGen-GD</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {NavItems.map((item) => (
