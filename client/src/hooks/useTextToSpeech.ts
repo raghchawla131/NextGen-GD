@@ -4,17 +4,24 @@ export function useTextToSpeech(text: string | null) {
   useEffect(() => {
     if (!text) return;
 
+    const synth = window.speechSynthesis;
+    let voices = synth.getVoices();
+
+    // Find Google US English
+    const preferredVoice = voices.find(v => v.name === "Google US English");
+
     const utterance = new SpeechSynthesisUtterance(text);
+    if (preferredVoice) {
+      utterance.voice = preferredVoice;
+    }
 
-    // Optional: customize voice, pitch, rate here
-    // utterance.voice = speechSynthesis.getVoices()[0];
-    // utterance.pitch = 1;
-    // utterance.rate = 1;
+    utterance.pitch = 1;
+    utterance.rate = 1;
 
-    window.speechSynthesis.speak(utterance);
+    synth.speak(utterance);
 
     return () => {
-      window.speechSynthesis.cancel();
+      synth.cancel();
     };
   }, [text]);
 }

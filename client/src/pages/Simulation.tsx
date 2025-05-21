@@ -46,7 +46,12 @@ const Simulation = () => {
   const prevMicOn = useRef<boolean>(micOn);
 
   // Function to handle text-to-speech
-  useTextToSpeech(botResponse);
+  // useTextToSpeech(botResponse);
+
+  useEffect(() => {
+    console.log(currentlyActiveBot);
+    
+  }, [currentlyActiveBot])
 
   useEffect(() => {
     // Cancel speech synthesis on every route change
@@ -62,8 +67,8 @@ const Simulation = () => {
           console.log("Mic turned off, using transcript:", transcript);
           setUserText(transcript);
           setChatHistory((prev) => [...prev, { role: 'user', content: transcript }])
-          const selectRandomBot = Math.floor(Math.random() * bots.length);
-          setCurrentlyActiveBot(selectRandomBot);
+          const nextBotIndex = ((currentlyActiveBot ?? 0) + 1) % bots.length;
+          setCurrentlyActiveBot(nextBotIndex);
         } else {
           console.log("No transcript captured.");
         }
@@ -94,11 +99,42 @@ const Simulation = () => {
     if (gdStarter === 'bot' && gdTopic) {
       const introPrompt = `Start a group discussion on "${gdTopic}". Speak like a real person, keep it natural and simple, under 40 words. Just give a brief opening statement like a participant would, no extra details.`;
 
-      const selectRandomBot = Math.floor(Math.random() * bots.length);
-      setCurrentlyActiveBot(selectRandomBot);
+      const nextBotIndex = ((currentlyActiveBot ?? 0) + 1) % bots.length;
+      setCurrentlyActiveBot(nextBotIndex);
       setUserText(introPrompt);
     }
   }, [gdStarter, gdTopic]);
+
+  //text to speech
+  useEffect(() => {
+    if (!botResponse || micOn) return;
+
+    const synth = window.speechSynthesis;
+    let voices = synth.getVoices();
+    const preferredVoice = voices.find(v => v.name === "Google US English");
+
+    const utterance = new SpeechSynthesisUtterance(botResponse);
+    utterance.voice = preferredVoice || null;
+    utterance.pitch = 1;
+    utterance.rate = 1;
+
+    utterance.onend = () => {
+      // After speaking, rotate to next bot
+      const nextBotIndex = ((currentlyActiveBot ?? -1) + 1) % bots.length;
+      setCurrentlyActiveBot(nextBotIndex);
+
+      const latestUserOrBotMessage = chatHistory[chatHistory.length - 1]?.content || '';
+      sendTextToGeminiForResponse(latestUserOrBotMessage);
+    };
+
+    synth.speak(utterance);
+
+    return () => {
+      synth.cancel();
+    };
+  }, [botResponse, micOn]);
+
+
 
   // Function to send text to Gemini API and get the response
   const sendTextToGeminiForResponse = async (latestText: string) => {
@@ -109,11 +145,11 @@ const Simulation = () => {
 
       const prompt = `
 You are participating in a group discussion. Reply like a natural person in simple, conversational English.
-Keep your response concise, under 50 words.
+Keep your response concise, under 10 words.
 Keep it relevant to the discussion and friendly.
 
-Conversation history:
-${historyText}
+Topic: ${gdTopic}
+Conversation history: ${historyText}
 
 User: ${latestText}
 Bot:`;

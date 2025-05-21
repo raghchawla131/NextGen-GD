@@ -1,6 +1,22 @@
+import { useEffect, useState } from "react";
 import SpeakAnimation from "./SpeakAnimation";
+import { time } from "console";
 
-const Avatar = ({ imgSrc }: { imgSrc: string }) => {
+const Avatar = ({ imgSrc, isSpeaking }: { imgSrc: string, isSpeaking: boolean }) => {
+  const [showSpeakAnimation, setShowSpeakAnimation] = useState(false);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (isSpeaking) {
+      timer = setTimeout(() => {
+        setShowSpeakAnimation(true);
+      }, 1600);
+    }
+    else {
+      setShowSpeakAnimation(false);
+    }
+    return () => clearTimeout(timer);
+  }, [isSpeaking]);
   return (
     <div className="flex flex-col items-center justify-center relative">
       {/* Avatar Image */}
@@ -15,7 +31,7 @@ const Avatar = ({ imgSrc }: { imgSrc: string }) => {
         </div>
         <div className=" absolute -bottom-6">
 
-          {/* <SpeakAnimation /> */}
+        {showSpeakAnimation && <SpeakAnimation />}
         </div>
       </div>
     </div>
