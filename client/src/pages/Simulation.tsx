@@ -7,10 +7,10 @@ import MicToggleButton from '@/components/simulation/MicToggleButton';
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
-import { useTextToSpeech } from '@/hooks/useTextToSpeech';
 import { generateFromGemini } from '@/utils/geminiAPI';
 import type { bot } from '@/types/bot';
 import ChatHistory from '@/components/simulation/ChatHistory';
+import { generateBotReplyPrompt, generateIntroPrompt } from '@/utils/prompts';
 
 type Message = {
   role: 'user' | 'bot';
@@ -19,9 +19,9 @@ type Message = {
 
 
 const bots: bot[] = [
-  { id: 'bot1', imgSrc: '/src/assets/28638-removebg-preview.png' },
-  { id: 'bot2', imgSrc: '/src/assets/28638-removebg-preview.png' },
-  { id: 'bot3', imgSrc: '/src/assets/28638-removebg-preview.png' },
+  { id: 'bot1', imgSrc: '/src/assets/28638-removebg-preview.png', personality: 'neutral' },
+  { id: 'bot2', imgSrc: '/src/assets/28638-removebg-preview.png', personality: 'defensive' },
+  { id: 'bot3', imgSrc: '/src/assets/28638-removebg-preview.png', personality: 'aggressive' },
 ];
 
 const Simulation = () => {
@@ -50,7 +50,7 @@ const Simulation = () => {
 
   useEffect(() => {
     console.log(currentlyActiveBot);
-    
+
   }, [currentlyActiveBot])
 
   useEffect(() => {
@@ -90,17 +90,19 @@ const Simulation = () => {
 
   useEffect(() => {
     if (userText.trim() !== '') {
-      sendTextToGeminiForResponse(userText);
+      const botStyle = bots[currentlyActiveBot ?? 0]?.personality || 'neutral';
+      sendTextToGeminiForResponse(userText, botStyle);
     }
   }, [userText]);
 
   // Handle the case when the bot is selected
   useEffect(() => {
     if (gdStarter === 'bot' && gdTopic) {
-      const introPrompt = `Start a group discussion on "${gdTopic}". Speak like a real person, keep it natural and simple, under 40 words. Just give a brief opening statement like a participant would, no extra details.`;
-
       const nextBotIndex = ((currentlyActiveBot ?? 0) + 1) % bots.length;
+      const botStyle = bots[nextBotIndex]?.personality || 'neutral';
+
       setCurrentlyActiveBot(nextBotIndex);
+      const introPrompt = generateIntroPrompt(gdTopic, botStyle);
       setUserText(introPrompt);
     }
   }, [gdStarter, gdTopic]);
@@ -119,13 +121,18 @@ const Simulation = () => {
     utterance.rate = 1;
 
     utterance.onend = () => {
-      // After speaking, rotate to next bot
       const nextBotIndex = ((currentlyActiveBot ?? -1) + 1) % bots.length;
       setCurrentlyActiveBot(nextBotIndex);
 
       const latestUserOrBotMessage = chatHistory[chatHistory.length - 1]?.content || '';
-      sendTextToGeminiForResponse(latestUserOrBotMessage);
+
+      // Delay sending the message until the bot index is updated
+      setTimeout(() => {
+        const newBotStyle = bots[nextBotIndex]?.personality || 'neutral';
+        sendTextToGeminiForResponse(latestUserOrBotMessage, newBotStyle);
+      }, 0);
     };
+
 
     synth.speak(utterance);
 
@@ -137,22 +144,13 @@ const Simulation = () => {
 
 
   // Function to send text to Gemini API and get the response
-  const sendTextToGeminiForResponse = async (latestText: string) => {
+  const sendTextToGeminiForResponse = async (latestText: string, botStyle: string) => {
     try {
       const historyText = chatHistory
         .map(m => `${m.role === 'user' ? 'User' : 'Bot'}: ${m.content}`)
         .join('\n');
 
-      const prompt = `
-You are participating in a group discussion. Reply like a natural person in simple, conversational English.
-Keep your response concise, under 10 words.
-Keep it relevant to the discussion and friendly.
-
-Topic: ${gdTopic}
-Conversation history: ${historyText}
-
-User: ${latestText}
-Bot:`;
+      const prompt = generateBotReplyPrompt(gdTopic ?? '', historyText, latestText, botStyle);
 
       const response = await generateFromGemini(prompt);
       const geminiResponse = response.data.result;
@@ -163,6 +161,7 @@ Bot:`;
       console.error('Gemini API error:', error);
     }
   };
+
 
 
   useEffect(() => {
@@ -188,12 +187,13 @@ Bot:`;
         <Timer timeLeft={timeLeft} />
         <div className="flex flex-col gap-16">
           <div className="relative w-fit mx-auto">
-            <Avatar imgSrc="/src/assets/28638-removebg-preview.png" />
+            <Avatar imgSrc="/src/assets/28638-removebg-preview.png" isSpeaking={micOn} />
             <MicToggleButton micOn={micOn} toggleMic={() => setMicOn(!micOn)} />
           </div>
           <BotManager
             bots={bots}
             currentlyActiveBot={currentlyActiveBot}
+            micOn={micOn}
           />
         </div>
         <ChatHistory history={chatHistory} />
