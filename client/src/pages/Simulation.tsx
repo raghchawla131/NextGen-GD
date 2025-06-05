@@ -1,3 +1,4 @@
+// Component imports
 import Container from '@/components/layout/Container';
 import Avatar from '@/components/simulation/Avatar';
 import BotManager from '@/components/simulation/BotManager';
@@ -12,12 +13,13 @@ import type { bot } from '@/types/bot';
 import ChatHistory from '@/components/simulation/ChatHistory';
 import { generateBotReplyPrompt, generateIntroPrompt } from '@/utils/prompts';
 
+// Define a chat message type
 type Message = {
   role: 'user' | 'bot';
   content: string;
 };
 
-
+// Bot configurations
 const bots: bot[] = [
   { id: 'bot1', imgSrc: '/src/assets/28638-removebg-preview.png', personality: 'neutral' },
   { id: 'bot2', imgSrc: '/src/assets/28638-removebg-preview.png', personality: 'defensive' },
@@ -25,163 +27,168 @@ const bots: bot[] = [
 ];
 
 const Simulation = () => {
-  const { time } = useParams();
+  // URL param and query string handling
+  const { time } = useParams(); // Group discussion duration
   const location = useLocation();
-
   const searchParams = new URLSearchParams(location.search);
   const gdTopic = searchParams.get('topic');
   const gdStarter = searchParams.get('starter');
 
+  // Convert time to seconds
   const parsedTime = time ? parseInt(time) * 60 : 0;
 
+  // State variables
   const [timeLeft, setTimeLeft] = useState<number>(parsedTime);
   const [micOn, setMicOn] = useState<boolean>(false);
-  const [userText, setUserText] = useState<string>('');
-  const [currentlyActiveBot, setCurrentlyActiveBot] = useState<number | null>(null);
-  const [botResponse, setBotResponse] = useState<string | null>(null);
   const [chatHistory, setChatHistory] = useState<Message[]>([]);
-  // const [isRecording, setIsRecording] = useState<boolean>(false);
-
+  const [activeBotIndex, setActiveBotIndex] = useState<number>(0);
+  const [botResponse, setBotResponse] = useState<string | null>(null);
+  const [conversationMode, setConversationMode] = useState<'bots' | 'user'>('bots');
   const { transcript } = useSpeechRecognition(micOn);
   const prevMicOn = useRef<boolean>(micOn);
 
-  // Function to handle text-to-speech
-  // useTextToSpeech(botResponse);
-
+  // Countdown timer
   useEffect(() => {
-    console.log(currentlyActiveBot);
+    if (parsedTime <= 0) return;
 
-  }, [currentlyActiveBot])
+    const interval = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 0) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
 
+    return () => clearInterval(interval);
+  }, [parsedTime]);
+
+  // Reset state when route changes
   useEffect(() => {
-    // Cancel speech synthesis on every route change
     window.speechSynthesis.cancel();
     setBotResponse(null);
   }, [location.pathname]);
 
-  // Handle the case when the mic is turned off
+  // Handle microphone toggle and transcript capture
   useEffect(() => {
-    if (!micOn && prevMicOn.current === true) {
-      const timeout = setTimeout(() => {
-        if (transcript.trim() !== '') {
-          console.log("Mic turned off, using transcript:", transcript);
-          setUserText(transcript);
-          setChatHistory((prev) => [...prev, { role: 'user', content: transcript }])
-          const nextBotIndex = ((currentlyActiveBot ?? 0) + 1) % bots.length;
-          setCurrentlyActiveBot(nextBotIndex);
-        } else {
-          console.log("No transcript captured.");
-        }
-      }, 1000); // wait 1 second after mic is off
+    if (micOn && !prevMicOn.current) {
+      // Mic turned on
+      window.speechSynthesis.cancel();
+      setBotResponse(null);
+      setConversationMode('paused');
+    }
 
-      return () => clearTimeout(timeout);
+    if (!micOn && prevMicOn.current) {
+      // Mic turned off
+      if (transcript.trim() !== '') {
+        setChatHistory((prev) => [...prev, { role: 'user', content: transcript.trim() }]);
+        setConversationMode('user');
+      } else {
+        setConversationMode('bots');
+      }
     }
 
     prevMicOn.current = micOn;
   }, [micOn, transcript]);
 
-  // if mic is turned on, cancel the speech synthesis
-  useEffect(() => {
-    if (micOn) {
-      window.speechSynthesis.cancel();
+  // Generate bot reply using Gemini API
+  const sendTextToGeminiForResponse = async (promptText: string, botStyle: string) => {
+    try {
+      const historyText = chatHistory
+        .map((m) => `${m.role === 'user' ? 'User' : 'Bot'}: ${m.content}`)
+        .join('\n');
+
+      const fullPrompt = generateBotReplyPrompt(gdTopic ?? '', historyText, promptText, botStyle);
+      const response = await generateFromGemini(fullPrompt);
+      const geminiResponse = response.data.result;
+
+      setChatHistory((prev) => [...prev, { role: 'bot', content: geminiResponse }]);
+      setBotResponse(geminiResponse);
+    } catch (error) {
+      console.error('[Gemini] API error:', error);
       setBotResponse(null);
     }
-  }, [micOn]);
+  };
 
+  // Conversation flow logic
   useEffect(() => {
-    if (userText.trim() !== '') {
-      const botStyle = bots[currentlyActiveBot ?? 0]?.personality || 'neutral';
-      sendTextToGeminiForResponse(userText, botStyle);
+    if (micOn) return; // Do nothing while mic is on
+
+    if (conversationMode === 'bots') {
+      const lastMessage = chatHistory[chatHistory.length - 1];
+      const promptText = lastMessage ? lastMessage.content : generateIntroPrompt(gdTopic ?? '', bots[activeBotIndex].personality);
+      const botStyle = bots[activeBotIndex].personality;
+
+      if (!botResponse) {
+        sendTextToGeminiForResponse(promptText, botStyle);
+      }
+    } else if (conversationMode === 'user') {
+      const lastUserMessage = [...chatHistory].reverse().find((m) => m.role === 'user');
+      if (!lastUserMessage) {
+        setConversationMode('bots');
+        return;
+      }
+
+      if (!botResponse) {
+        const botStyle = bots[activeBotIndex].personality;
+        sendTextToGeminiForResponse(lastUserMessage.content, botStyle);
+      }
     }
-  }, [userText]);
+  }, [botResponse, micOn, conversationMode, activeBotIndex, chatHistory, gdTopic]);
 
-  // Handle the case when the bot is selected
-  useEffect(() => {
-    if (gdStarter === 'bot' && gdTopic) {
-      const nextBotIndex = ((currentlyActiveBot ?? 0) + 1) % bots.length;
-      const botStyle = bots[nextBotIndex]?.personality || 'neutral';
-
-      setCurrentlyActiveBot(nextBotIndex);
-      const introPrompt = generateIntroPrompt(gdTopic, botStyle);
-      setUserText(introPrompt);
-    }
-  }, [gdStarter, gdTopic]);
-
-  //text to speech
+  // Text-to-Speech for bot responses
   useEffect(() => {
     if (!botResponse || micOn) return;
 
     const synth = window.speechSynthesis;
-    let voices = synth.getVoices();
-    const preferredVoice = voices.find(v => v.name === "Google US English");
-
     const sanitizedResponse = botResponse.replace(/[*_`~]/g, '');
     const utterance = new SpeechSynthesisUtterance(sanitizedResponse);
-
-    utterance.voice = preferredVoice || null;
     utterance.pitch = 1;
     utterance.rate = 1;
 
     utterance.onend = () => {
-      const nextBotIndex = ((currentlyActiveBot ?? -1) + 1) % bots.length;
-      setCurrentlyActiveBot(nextBotIndex);
-
-      const latestUserOrBotMessage = chatHistory[chatHistory.length - 1]?.content || '';
-
-      // Delay sending the message until the bot index is updated
-      setTimeout(() => {
-        const newBotStyle = bots[nextBotIndex]?.personality || 'neutral';
-        sendTextToGeminiForResponse(latestUserOrBotMessage, newBotStyle);
-      }, 0);
+      // Switch conversation mode or bot
+      if (conversationMode === 'user') {
+        setConversationMode('bots');
+        setActiveBotIndex((prev) => (prev + 1) % bots.length);
+        setBotResponse(null);
+      } else if (conversationMode === 'bots') {
+        setActiveBotIndex((prev) => (prev + 1) % bots.length);
+        setBotResponse(null);
+      } else {
+        setBotResponse(null);
+      }
     };
-
 
     synth.speak(utterance);
 
-    return () => {
-      synth.cancel();
-    };
-  }, [botResponse, micOn]);
+    return () => synth.cancel();
+  }, [botResponse, micOn, conversationMode]);
 
-
-
-  // Function to send text to Gemini API and get the response
-  const sendTextToGeminiForResponse = async (latestText: string, botStyle: string) => {
-    try {
-      const historyText = chatHistory
-        .map(m => `${m.role === 'user' ? 'User' : 'Bot'}: ${m.content}`)
-        .join('\n');
-
-      const prompt = generateBotReplyPrompt(gdTopic ?? '', historyText, latestText, botStyle);
-
-      const response = await generateFromGemini(prompt);
-      const geminiResponse = response.data.result;
-
-      setBotResponse(geminiResponse);
-      setChatHistory(prev => [...prev, { role: 'bot', content: geminiResponse }]);
-    } catch (error) {
-      console.error('Gemini API error:', error);
-    }
-  };
-
-
-
+  // Trigger bot-started discussion intro
   useEffect(() => {
-    if (timeLeft <= 0) return;
+    if (gdStarter === 'bot' && gdTopic && chatHistory.length === 0) {
+      setActiveBotIndex(0);
+      setChatHistory([{ role: 'bot', content: `Group Discussion on: ${gdTopic}` }]);
 
-    const interval = setInterval(() => {
-      setTimeLeft((prevTime) => {
-        if (prevTime <= 0) {
-          clearInterval(interval);
-          return 0;
-        }
-        return prevTime - 1;
-      });
-    }, 1000);
+      const spokenIntro = `Let's begin the discussion on "${gdTopic}".`;
 
-    return () => clearInterval(interval);
-  }, [timeLeft]);
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(spokenIntro);
+      utterance.pitch = 1;
+      utterance.rate = 1;
 
+      utterance.onend = () => {
+        setConversationMode('bots');
+        setBotResponse(null);
+      };
+
+      window.speechSynthesis.speak(utterance);
+    }
+  }, [gdStarter, gdTopic, chatHistory.length]);
+
+  // Render simulation UI
   return (
     <>
       <GreenLine timeLeft={timeLeft} duration={parsedTime} />
@@ -192,11 +199,7 @@ const Simulation = () => {
             <Avatar imgSrc="/src/assets/28638-removebg-preview.png" isSpeaking={micOn} />
             <MicToggleButton micOn={micOn} toggleMic={() => setMicOn(!micOn)} />
           </div>
-          <BotManager
-            bots={bots}
-            currentlyActiveBot={currentlyActiveBot}
-            micOn={micOn}
-          />
+          <BotManager bots={bots} currentlyActiveBot={activeBotIndex} micOn={micOn} />
         </div>
         <ChatHistory history={chatHistory} />
       </Container>
@@ -204,4 +207,4 @@ const Simulation = () => {
   );
 };
 
-export default Simulation; 
+export default Simulation;

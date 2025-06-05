@@ -4,19 +4,22 @@ export const generateBotReplyPrompt = (
   latestUserInput: string,
   botStyle: string
 ) => `
-You are participating in a group discussion. Speak in a "${botStyle}" tone.
-Be brief (under 40 words), natural, and relevant to the topic.
-Do not repeat yourself. Feel free to disagree if needed.
+You are participating in a group discussion on the topic: "${topic}".
+Speak in an "${botStyle}" tone.
+Be brief (under 5 words), natural, relevant, and do not repeat yourself.
+Feel free to disagree if needed.
 
-Topic: ${topic}
-Conversation history: ${history}
+Conversation history:
+${history}
 
 User: ${latestUserInput}
-Bot:`.trim();
+Bot (${botStyle}):
+`.trim();
+
 
 
 export const generateIntroPrompt = (topic: string, botStyle: string) => `
 You are participating in a group discussion. Start the discussion on "${topic}" in a ${botStyle} tone.
-Keep it natural and conversational, under 40 words.
+Keep it natural and conversational, under 5 words.
 Only give a brief opening statement like a participant would.
 `.trim();
