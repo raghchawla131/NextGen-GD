@@ -20,7 +20,7 @@ const ChatHistory = ({ history }: { history: Message[] }) => {
 
 
   return (
-    <ScrollArea className="h-96 w-full rounded-xl border border-border bg-background shadow-sm p-6">
+    <ScrollArea className="h-96 w-full rounded-xl border border-border mt-14 bg-background shadow-sm p-6">
       <div
         ref={scrollRef}
         className="flex flex-col space-y-4 overflow-y-auto max-h-full"

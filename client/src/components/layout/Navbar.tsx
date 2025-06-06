@@ -2,8 +2,13 @@ import { Button } from '../ui/button'
 // import { ModeToggle } from '../theme/mode-toggle'
 import Container from './Container'
 import { NavItems } from './NavItems'
+import { useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
+  const navigate = useNavigate();
+  const handleSignin = () => {
+    navigate('/signin');
+  };
   return (
     <nav className="w-full border-b shadow-sm py-4 bg-background">
       <Container>
@@ -26,7 +31,7 @@ const Navbar = () => {
 
           <div className="flex items-center gap-3">
             {/* <ModeToggle /> */}
-            <Button>Login</Button>
+            <Button onClick={handleSignin}>Login</Button>
           </div>
         </div>
       </Container>

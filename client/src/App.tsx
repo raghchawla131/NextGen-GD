@@ -11,6 +11,8 @@ import Simulation from './pages/Simulation';
 import Setup from './pages/Setup';
 import About from './pages/About';
 import Contact from './pages/Contact';
+import SignIn from './pages/SignIn';
+import SignUp from './pages/SignUp';
 
 function App() {
 
@@ -40,6 +42,14 @@ function App() {
           element: <Contact />
         },
       ]
+    },
+    {
+      path: '/signin',
+      element: <SignIn />
+    },
+    {
+      path: '/signup',
+      element: <SignUp />
     }
   ])
 

@@ -4,10 +4,23 @@ import { Button } from '@/components/ui/button'
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+
+
 const Setup = () => {
+
+    const gdTopics = [
+      "Is AI a threat to human jobs?",
+      "Should social media be regulated?",
+      "Is online education as effective as traditional learning?",
+      "Is remote work here to stay?",
+      "Should voting be mandatory?"
+    ];
+
   const [selectedTime, setSelectedTime] = useState<number | null>(10);
-  const [selectedTopic, setSelectedTopic] = useState<string | null>("Is AI a threat to human jobs?");
+  const [selectedTopic, setSelectedTopic] = useState<string | null>("");
   const [starter, setStarter] = useState<'user' | 'bot' | null>("bot");
+  const [showDropdown, setShowDropdown] = useState(false);
+
   const navigate = useNavigate();
 
   const handleStartGD = () => {
@@ -16,12 +29,6 @@ const Setup = () => {
       navigate(`/simulation/${selectedTime}?topic=${topic}&starter=${starter}`);
     }
   };
-
-  const gdTopics = [
-    "Is AI a threat to human jobs?",
-    "Should social media be regulated?",
-    "Is online education as effective as traditional learning?"
-  ];
 
   return (
     <Container>
@@ -33,7 +40,7 @@ const Setup = () => {
           <div className="space-y-2 text-center">
             <h2 className="text-xl font-medium">Select Time</h2>
             <div className="flex flex-wrap justify-center gap-4">
-              {[5, 10, 15].map((time) => (
+              {[1, 5, 10, 15].map((time) => (
                 <Button
                   key={time}
                   onClick={() => setSelectedTime(time)}
@@ -46,21 +53,46 @@ const Setup = () => {
           </div>
 
           {/* Topic Selection */}
-          <div className="space-y-2 text-center">
-            <h2 className="text-xl font-medium">Select GD Topic</h2>
-            <div className="flex flex-col sm:flex-row sm:flex-wrap sm:justify-center gap-2">
-              {gdTopics.map((topic) => (
-                <Button
-                  key={topic}
-                  onClick={() => setSelectedTopic(topic)}
-                  variant={selectedTopic === topic ? 'default' : 'outline'}
-                  className="text-sm text-wrap text-center whitespace-normal px-4 py-7 sm:py-4"
-                >
-                  {topic}
-                </Button>
-              ))}
+          {/* Topic Selection */}
+          <div className="space-y-4 text-center relative">
+            <h2 className="text-xl font-medium">Select or Type a GD Topic</h2>
+
+            {/* Input Field */}
+            <div className="relative w-full max-w-md mx-auto">
+              <input
+                type="text"
+                placeholder="Type or select a GD topic..."
+                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                value={selectedTopic || ""}
+                onChange={(e) => setSelectedTopic(e.target.value)}
+                onFocus={() => setShowDropdown(true)}
+                onBlur={() => setTimeout(() => setShowDropdown(false), 100)} // allow click
+              />
+
+              {/* Dropdown List */}
+              {showDropdown && (
+                <ul className="absolute z-10 w-full max-h-48 mt-1 overflow-y-auto bg-white border border-gray-200 rounded-md shadow-lg text-left">
+                  {gdTopics
+                    .filter((topic) =>
+                      topic.toLowerCase().includes((selectedTopic || "").toLowerCase())
+                    )
+                    .map((topic) => (
+                      <li
+                        key={topic}
+                        onMouseDown={() => {
+                          setSelectedTopic(topic);
+                          setShowDropdown(false);
+                        }}
+                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                      >
+                        {topic}
+                      </li>
+                    ))}
+                </ul>
+              )}
             </div>
           </div>
+
 
           {/* Starter Selection */}
           <div className="space-y-2 text-center">
