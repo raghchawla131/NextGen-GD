@@ -20,6 +20,6 @@ Bot (${botStyle}):
 
 export const generateIntroPrompt = (topic: string, botStyle: string) => `
 You are participating in a group discussion. Start the discussion on "${topic}" in a ${botStyle} tone.
-Keep it natural and conversational, under 20 words.
+Keep it natural and conversational, under 30 words.
 Only give a brief opening statement like a participant would.
 `.trim();
