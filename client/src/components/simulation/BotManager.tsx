@@ -1,23 +1,29 @@
-import React from 'react';
-import Avatar from './Avatar';
-import type { bot } from '@/types/bot';
+import React from 'react'
+import ParticipantAvatar from './ParticipantAvatar'
 
-interface BotManagerProps {
-  bots: bot[];
-  currentlyActiveBot: number | null;
-  micOn: boolean;
+interface bot {
+  id: number,
+  name: string,
+  role: string,
 }
 
-const BotManager = ({ bots, currentlyActiveBot, micOn }: BotManagerProps) => {
+interface botsProp {
+  bots: bot[],
+}
+
+const BotManager = ( {bots}: botsProp ) => {
   return (
-    <div className="flex flex-col sm:flex-row justify-center items-center gap-16 relative">
-      {bots.map((bot, index) => (
-        <div key={bot.id} className="flex flex-col items-center">
-          <Avatar imgSrc={bot.imgSrc} isSpeaking={index == currentlyActiveBot && !micOn} delay={true} />
+    <div className=' w-full flex justify-around'>
+      {bots.map((bot) => (
+        <div
+          key={bot.id}
+          className=''
+        >
+          <ParticipantAvatar details={bot} />
         </div>
       ))}
     </div>
-  );
-};
+  )
+}
 
-export default BotManager;
+export default BotManager
