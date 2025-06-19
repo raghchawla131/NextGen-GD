@@ -1,27 +1,19 @@
+import { useSimulation } from '@/context/SimulationContext';
 import { Mic, MicOff } from 'lucide-react';
 
-interface MicToggleButtonProps {
-  micOn: boolean;
-  toggleMic: () => void;
-}
+const MicToggleButton = () => {
+  const { micOn, setMicOn } = useSimulation();
 
-const MicToggleButton: React.FC<MicToggleButtonProps> = ({ micOn, toggleMic }) => {
+  const toggleMic = () => setMicOn(!micOn);
+
   return (
-    <div
-      className="absolute bottom-0 right-0 cursor-pointer bg-blue-500 rounded-full p-2 transition-all duration-300 ease-in-out w-8 h-8 flex items-center justify-center"
+    <button
       onClick={toggleMic}
+      className=" bg-blue-400 rounded-full p-2 absolute bottom-0 right-0"
     >
-      <Mic
-        className={`text-white w-4 h-4 absolute transition-all duration-300 ease-in-out ${micOn ? 'opacity-100 scale-100' : 'opacity-0 scale-0'
-          }`}
-      />
-      <MicOff
-        className={`text-white w-4 h-4 absolute transition-all duration-300 ease-in-out ${micOn ? 'opacity-0 scale-0' : 'opacity-100 scale-100'
-          }`}
-      />
-    </div>
+      {micOn ? <Mic className="w-6 h-6 text-foreground" /> : <MicOff className="w-6 h-6 text-foreground" />}
+    </button>
   );
 };
 
 export default MicToggleButton;
-  

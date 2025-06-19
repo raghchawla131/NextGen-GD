@@ -32,7 +32,10 @@ const CountdownClock: React.FC<CountdownClockProps> = ({ minutes }) => {
   };
 
   return (
-    <span className="px-5 py-2 rounded-xl bg-yellow-200 text-yellow-900 text-3xl font-extrabold tracking-widest shadow-sm border border-yellow-300 uppercase">
+    <span 
+      className=" w-[250px] flex justify-center items-center px-5 py-2 rounded-xl bg-foreground text-background text-5xl font-extrabold tracking-widest shadow-sm border border-yellow-300 uppercase"
+      style={{ fontFamily: 'Orbitron, sans-serif', fontVariantNumeric: 'tabular-nums' }}
+    >
       {formatTime(secondsLeft)}
     </span>
 
