@@ -13,46 +13,46 @@ const bots = [
 ];
 
 const Simulation = () => {
-  const {status, setStatus} = useSimulation();
+  const { status, setStatus } = useSimulation();
   const { time } = useParams();
   const timeInMinutes = parseInt(time || '0');
 
   useEffect(() => {
-    if(status === 'idle') {
+    if (status === 'idle') {
       setStatus('bots-talking');
       return;
     }
-    if(status === 'waiting') {
+    if (status === 'waiting') {
       const pauseBeforeReplyTimeout = setTimeout(() => {
         setStatus('bots-talking');
       }, 500);
       return () => clearTimeout(pauseBeforeReplyTimeout);
     }
-    if(status === 'ended') {
+    if (status === 'ended') {
       console.log("gd ended");
     }
-  }, [status, setStatus])
+  }, [status, setStatus]);
 
   return (
-    <div className="min-h-[88vh] w-full flex flex-col md:grid md:grid-cols-2 bg-background text-foreground overflow-hidden">
+    <div className="min-h-[88vh] w-full flex flex-col md:grid md:grid-cols-2 bg-foreground text-background overflow-hidden">
       {/* Grid Left */}
       <div className="grid grid-rows-2 border-b md:border-b-0 md:border-r">
         {/* Grid Left Top */}
         <div className="grid grid-cols-1 md:grid-cols-3 h-full">
           {/* Top Left */}
-          <div className="md:col-span-2 bg-foreground rounded-2xl flex flex-col items-center justify-center p-6">
+          <div className="md:col-span-2 bg-background rounded-2xl flex flex-col items-center justify-center p-6">
             {timeInMinutes > 0 && (
               <CountdownClock minutes={timeInMinutes} />
             )}
           </div>
           {/* Top Right */}
-          <div className="  rounded-2xl md:border-l flex items-center justify-center p-4">
+          <div className="rounded-2xl md:border-l flex items-center justify-center p-4">
             <UserManager />
           </div>
         </div>
 
         {/* Grid Left Bottom */}
-        <div className=" bg-foreground rounded-2xl flex items-center justify-center p-4">
+        <div className="bg-background rounded-2xl flex items-center justify-center p-4">
           <BotManager bots={bots} />
         </div>
       </div>

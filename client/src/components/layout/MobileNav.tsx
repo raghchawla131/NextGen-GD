@@ -8,7 +8,7 @@ import MySidebar from './MySidebar';
 const MobileNav: React.FC = () => {
   return (
     <SidebarProvider>
-      <nav className="w-full py-4 bg-background shadow-sm border-b h-fit">
+      <nav className="w-full py-4 bg-background shadow-sm h-fit">
         <Container>
           <div className="flex justify-between items-center">
             <div className="text-xl font-bold text-foreground">NextGen GD</div>

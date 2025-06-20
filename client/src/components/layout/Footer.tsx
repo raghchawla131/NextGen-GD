@@ -3,9 +3,9 @@ import Container from './Container'
 
 const Footer: React.FC = () => {
   return (
-    <footer className="border-t border-border py-6 text-sm text-muted-foreground">
+    <footer className=" py-6 text-sm border-t text-background bg-foreground">
       <Container>
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div className=" bg-foreground flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>&copy; {new Date().getFullYear()} NextGen-GD. All rights reserved.</span>
           <div className="flex space-x-4">
             <a href="/privacy" className="hover:underline">Privacy</a>

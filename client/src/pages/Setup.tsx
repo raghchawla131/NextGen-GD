@@ -27,21 +27,21 @@ const Setup = () => {
   }
 
   return (
-    <div className=' flex justify-center items-center p-6'>
-      <Card className='w-full max-w-3xl p-6 sm:p-10 flex flex-col gap-8 items-center'>
+    <div className='flex justify-center items-center p-6 bg-foreground'>
+      <Card className=' border-none w-full max-w-3xl p-6 sm:p-10 flex flex-col gap-8 items-center bg-foreground text-background'>
         <h1 className='text-2xl sm:text-3xl font-semibold text-center'>Group Discussion Setup</h1>
 
         {/* Time Selection */}
         <div className='flex flex-col gap-2 items-center w-full'>
-          <h3 className='text-sm sm:text-base text-muted-foreground'>Select Time</h3>
+          <h3 className='text-sm sm:text-base text-background/70'>Select Time</h3>
           <div className='flex flex-wrap justify-center gap-3'>
             {gdTimeOptions.map((time) => (
               <Button
                 key={time}
                 variant='outline'
                 className={gdTime === time
-                  ? 'bg-foreground text-background hover:bg-foreground hover:text-background'
-                  : 'bg-background text-foreground hover:bg-foreground hover:text-background'
+                  ? 'bg-background text-foreground hover:bg-background hover:text-foreground'
+                  : 'bg-foreground text-background hover:bg-background hover:text-foreground'
                 }
                 onClick={() => setGdTime(time)}
               >
@@ -53,7 +53,7 @@ const Setup = () => {
 
         {/* Topic Input */}
         <div className='flex flex-col gap-2 items-center w-full'>
-          <h3 className='text-sm sm:text-base text-muted-foreground'>Select or Type a GD Topic</h3>
+          <h3 className='text-sm sm:text-base text-background/70'>Select or Type a GD Topic</h3>
           <div className='relative w-full sm:w-96'>
             <Input
               value={gdTopic}
@@ -61,9 +61,10 @@ const Setup = () => {
               onFocus={() => setShowDropDown(true)}
               onBlur={() => setTimeout(() => setShowDropDown(false), 100)}
               placeholder='Select or type a topic'
+              className='bg-foreground text-background'
             />
             {showDropDown && (
-              <div className='absolute top-full left-0 mt-1 w-full max-h-40 overflow-y-auto bg-background border border-border rounded-md shadow-lg z-50'>
+              <div className='absolute border-1 top-full left-0 mt-1 w-full max-h-40 overflow-y-auto bg-foreground rounded-md shadow-lg z-50'>
                 {gdSuggestions
                   .filter(s => s.toLowerCase().includes(gdTopic.toLowerCase()))
                   .map((suggestion, index) => (
@@ -73,13 +74,13 @@ const Setup = () => {
                         setGdTopic(suggestion);
                         setShowDropDown(false);
                       }}
-                      className='px-4 py-2 text-sm cursor-pointer hover:bg-muted transition-colors'
+                      className='px-4 py-2 text-sm cursor-pointer hover:bg-background hover:text-foreground transition-colors text-background'
                     >
                       {suggestion}
                     </div>
                   ))}
                 {gdSuggestions.filter(s => s.toLowerCase().includes(gdTopic.toLowerCase())).length === 0 && (
-                  <div className='px-4 py-2 text-sm text-muted-foreground'>
+                  <div className='px-4 py-2 text-sm text-background/60'>
                     No matching topics
                   </div>
                 )}
@@ -90,15 +91,15 @@ const Setup = () => {
 
         {/* Starter Selection */}
         <div className='flex flex-col gap-2 items-center w-full'>
-          <h3 className='text-sm sm:text-base text-muted-foreground'>Who will start the GD?</h3>
+          <h3 className='text-sm sm:text-base text-background/70'>Who will start the GD?</h3>
           <div className='flex flex-wrap justify-center gap-4'>
             {gdStarterOptions.map((starter) => (
               <Button
                 key={starter}
                 variant='outline'
                 className={gdStarter === starter
-                  ? 'bg-foreground text-background hover:bg-foreground hover:text-background'
-                  : 'bg-background text-foreground hover:bg-foreground hover:text-background'
+                  ? 'bg-background text-foreground hover:bg-background hover:text-foreground'
+                  : 'bg-foreground text-background hover:bg-background hover:text-foreground'
                 }
                 onClick={() => setGdStarter(starter)}
               >
@@ -111,6 +112,7 @@ const Setup = () => {
         <Button
           disabled={!gdTopic || !gdTime || !gdStarter}
           onClick={handleStartGd}
+          className='bg-background text-foreground disabled:opacity-50 disabled:cursor-not-allowed'
         >
           Start GD
         </Button>

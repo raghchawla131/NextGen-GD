@@ -6,23 +6,25 @@ import { useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
   const navigate = useNavigate();
+
   const handleSignin = () => {
     navigate('/signin');
   };
+
   return (
-    <nav className="w-full border-b shadow-sm py-4 bg-background">
+    <nav className="w-full shadow-sm py-4 bg-foreground">
       <Container>
         <div className="flex items-center justify-between">
-          <div className="text-xl font-bold text-foreground">
+          <div className="text-xl font-bold text-background">
             NextGen GD
           </div>
 
-          <div className="space-x-6 text-foreground font-medium">
+          <div className="space-x-6 text-background font-medium">
             {NavItems.map((item) => (
               <a
                 key={item.title}
                 href={item.url}
-                className="hover:text-muted-foreground transition"
+                className="hover:opacity-80 transition-colors duration-200"
               >
                 {item.title}
               </a>
@@ -36,7 +38,7 @@ const Navbar = () => {
         </div>
       </Container>
     </nav>
-  )
-}
+  );
+};
 
-export default Navbar
+export default Navbar;
