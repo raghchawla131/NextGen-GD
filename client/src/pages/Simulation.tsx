@@ -1,7 +1,7 @@
 import BotManager from '@/components/simulation/BotManager';
 import UserManager from '@/components/simulation/UserManager';
 import CountdownClock from '@/components/simulation/CountdownClock';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import ChatFeed from '@/components/simulation/ChatFeed';
 import { useSimulation } from '@/context/SimulationContext';
 import { useEffect } from 'react';
@@ -15,6 +15,11 @@ const bots = [
 const Simulation = () => {
   const { status, setStatus } = useSimulation();
   const { time } = useParams();
+
+  const [searchParams] = useSearchParams();
+
+  const topic = searchParams.get('topic') || 'Default Topic';
+  const starter = searchParams.get('starter') || 'bot';
   const timeInMinutes = parseInt(time || '0');
 
   useEffect(() => {

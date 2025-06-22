@@ -29,8 +29,8 @@ const Home = () => {
             </FuzzyText>
 
           </div>
-          <div className="absolute top-0 right-0 pt-10 text-muted-foreground flex flex-col gap-3 hidden lg:block">
-            <div className="drop-shadow-[0_0_10px_#00ffff]">
+          <div className="absolute top-0 right-0 pt-10 text-muted-foreground hidden lg:block">
+            <div className="drop-shadow-[0_0_10px_#00ffff] mb-3">
               <FuzzyText
                 baseIntensity={0.2}
                 hoverIntensity={0.4}

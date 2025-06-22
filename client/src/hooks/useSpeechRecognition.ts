@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
+import { useSimulation } from "@/context/SimulationContext";
 
-// Type fixes
 type SpeechRecognition = any;
 type SpeechRecognitionEvent = any;
 
@@ -11,8 +11,9 @@ declare global {
 }
 
 export const useSpeechRecognition = (isActive: boolean) => {
-  const [transcript, setTranscript] = useState("");
   const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const { setTranscript } = useSimulation();
+  const transcriptRef = useRef(""); // Store interim result until recognition ends
 
   useEffect(() => {
     if (!("webkitSpeechRecognition" in window)) {
@@ -28,27 +29,38 @@ export const useSpeechRecognition = (isActive: boolean) => {
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
       const result = event.results[0][0].transcript;
-      setTranscript(result);
+      console.log("🎤 User said:", result);
+      transcriptRef.current = result; // Store result temporarily
     };
 
     recognition.onerror = (event: any) => {
-      console.error("Speech recognition error:", event.error);
+      console.error("❌ Speech recognition error:", event.error);
+    };
+
+    recognition.onspeechend = () => {
+      console.log("🧘 Speech ended. Stopping...");
+      recognition.stop();
+    };
+
+    recognition.onend = () => {
+      console.log("🛑 Speech recognition ended.");
+      // Finalize and update context transcript after recognition completes
+      setTranscript(transcriptRef.current);
     };
 
     recognitionRef.current = recognition;
-  }, []);
+  }, [setTranscript]);
 
   useEffect(() => {
     const recognition = recognitionRef.current;
     if (!recognition) return;
 
     if (isActive) {
-      setTranscript("");
+      transcriptRef.current = "";
+      setTranscript(""); // Clear before starting
       recognition.start();
     } else {
-      recognition.stop();
+      recognition.stop(); // Still allow manual stop
     }
-  }, [isActive]);
-
-  return { transcript };
+  }, [isActive, setTranscript]);
 };

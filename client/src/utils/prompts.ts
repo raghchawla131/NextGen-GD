@@ -1,3 +1,4 @@
+// utils/prompts.ts
 export const generateBotReplyPrompt = (
   topic: string,
   history: string,
@@ -15,8 +16,6 @@ ${history}
 User: ${latestUserInput}
 Bot (${botStyle}):
 `.trim();
-
-
 
 export const generateIntroPrompt = (topic: string, botStyle: string) => `
 You are participating in a group discussion. Start the discussion on "${topic}" in a ${botStyle} tone.

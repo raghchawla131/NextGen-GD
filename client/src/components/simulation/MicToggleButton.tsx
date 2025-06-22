@@ -4,7 +4,9 @@ import { Mic, MicOff } from 'lucide-react';
 const MicToggleButton = () => {
   const { micOn, setMicOn } = useSimulation();
 
-  const toggleMic = () => setMicOn(!micOn);
+  const toggleMic = () => {
+  setTimeout(() => setMicOn(!micOn), 500); // small delay to allow onresult to fire
+};
 
   return (
     <button

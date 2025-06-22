@@ -1,5 +1,5 @@
-// components/simulation/CountdownClock.tsx
 import React, { useEffect, useState } from 'react';
+import { useSimulation } from '@/context/SimulationContext';
 
 interface CountdownClockProps {
   minutes: number;
@@ -8,6 +8,7 @@ interface CountdownClockProps {
 const CountdownClock: React.FC<CountdownClockProps> = ({ minutes }) => {
   const totalSeconds = minutes * 60;
   const [secondsLeft, setSecondsLeft] = useState(totalSeconds);
+  const { setStatus } = useSimulation();
 
   useEffect(() => {
     if (isNaN(totalSeconds) || totalSeconds <= 0) return;
@@ -16,6 +17,7 @@ const CountdownClock: React.FC<CountdownClockProps> = ({ minutes }) => {
       setSecondsLeft(prev => {
         if (prev <= 1) {
           clearInterval(interval);
+          setStatus('ended'); // ✅ Update status when time runs out
           return 0;
         }
         return prev - 1;
@@ -23,7 +25,7 @@ const CountdownClock: React.FC<CountdownClockProps> = ({ minutes }) => {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [totalSeconds]);
+  }, [totalSeconds, setStatus]);
 
   const formatTime = (s: number) => {
     const m = Math.floor(s / 60).toString().padStart(2, '0');
@@ -33,12 +35,11 @@ const CountdownClock: React.FC<CountdownClockProps> = ({ minutes }) => {
 
   return (
     <span
-      className=" w-[250px] flex justify-center items-center px-5 py-2 rounded-xl bg-foreground text-background text-5xl font-extrabold tracking-widest shadow-sm border border-yellow-300 uppercase"
+      className="w-[250px] flex justify-center items-center px-5 py-2 rounded-xl bg-foreground text-background text-5xl font-extrabold tracking-widest shadow-sm border border-yellow-300 uppercase"
       style={{ fontFamily: 'Orbitron, sans-serif', fontVariantNumeric: 'tabular-nums' }}
     >
       {formatTime(secondsLeft)}
     </span>
-
   );
 };
 

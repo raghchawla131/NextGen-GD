@@ -5,23 +5,22 @@ export function useTextToSpeech(text: string | null) {
     if (!text) return;
 
     const synth = window.speechSynthesis;
-    let voices = synth.getVoices();
 
-    // Find Google US English
-    const preferredVoice = voices.find(v => v.name === "Google US English");
+    const speak = () => {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.pitch = 1;
+      utterance.rate = 1;
+      synth.speak(utterance);
+    };
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    if (preferredVoice) {
-      utterance.voice = preferredVoice;
+    // Wait a bit if voices haven't loaded yet
+    if (synth.getVoices().length === 0) {
+      const id = setTimeout(speak, 100); // small delay to let voices load
+      return () => clearTimeout(id);
+    } else {
+      speak();
     }
 
-    utterance.pitch = 1;
-    utterance.rate = 1;
-
-    synth.speak(utterance);
-
-    return () => {
-      synth.cancel();
-    };
+    return () => synth.cancel();
   }, [text]);
 }
