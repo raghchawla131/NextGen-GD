@@ -3,7 +3,7 @@ import React, { createContext, useContext, useEffect, useRef, useState } from "r
 
 interface ChatMessage {
   sender: 'user' | 'bot';
-  name?: string; // For bot name if needed
+  name?: string;
   text: string;
 }
 
@@ -24,60 +24,96 @@ interface SimulationContextType {
   starter: string;
 }
 
-
-const SimulationContext = createContext<SimulationContextType | null>(null)
+const SimulationContext = createContext<SimulationContextType | null>(null);
 
 interface SimulationProviderProps {
   children: React.ReactNode;
   topic: string;
-  starter: string; // e.g. "bot" or "user"
+  starter: string;
 }
 
 export const SimulationProvider = ({ children, topic, starter }: SimulationProviderProps) => {
   const [micOn, setMicOn] = useState(false);
   const [status, setStatus] = useState<'idle' | 'waiting' | 'bots-talking' | 'user-speaking' | 'ended'>('idle');
-  const [currBotIndex, setCurrBotIndex] = useState(0);
   const [transcript, setTranscript] = useState("");
   const [userGeminiResponse, setUserGeminiResponse] = useState("");
   const [botGeminiResponses, setBotGeminiResponses] = useState<string[]>([]);
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
 
-  // Save these in state or refs to use later
   const [gdTopic] = useState(topic);
   const [gdStarter] = useState(starter);
 
   const prevMicOnRef = useRef(false);
+  const isProcessingUserInputRef = useRef(false);
 
+  // 🧠 micOn and status logic — transition handling
   useEffect(() => {
     if (status === 'ended') return;
 
     if (micOn) {
-      setStatus('user-speaking');
-    } else if (status === 'user-speaking') {
-      setStatus('waiting');
+      if (status !== 'user-speaking') {
+        setStatus('user-speaking');
+      }
+    } else {
+      if (status === 'user-speaking') {
+        setStatus('waiting');
+      }
     }
   }, [micOn, status]);
 
+  // 📤 Generate Gemini response when mic turns off and transcript is available
   useEffect(() => {
     const prevMicOn = prevMicOnRef.current;
+    prevMicOnRef.current = micOn;
 
-    if (prevMicOn && !micOn) {
-      console.log("Mic turned OFF — Transcript:", transcript);
-
+    if (prevMicOn && !micOn && !isProcessingUserInputRef.current) {
       if (transcript.trim()) {
+        isProcessingUserInputRef.current = true;
+        
+        // Add user message to chat history immediately
+        setChatHistory(prev => [...prev, { 
+          sender: 'user', 
+          name: 'You', 
+          text: transcript 
+        }]);
+
         generateFromGemini(transcript)
           .then(res => {
-            console.log("Gemini replied:", res.data.result);
             setUserGeminiResponse(res.data.result);
+            
+            // Add Gemini's response to chat history
+            setChatHistory(prev => [...prev, { 
+              sender: 'bot', 
+              name: 'Gemini', 
+              text: res.data.result 
+            }]);
           })
           .catch(err => {
-            console.error("Gemini API error:", err);
+            // Remove the user message if Gemini failed
+            setChatHistory(prev => prev.slice(0, -1));
+          })
+          .finally(() => {
+            isProcessingUserInputRef.current = false;
+            // Clear transcript after processing
+            setTranscript("");
           });
+      } else {
+        setTranscript("");
       }
     }
-
-    prevMicOnRef.current = micOn;
   }, [micOn, transcript]);
+
+  // 🚀 Auto-resume bot discussion after user interaction
+  useEffect(() => {
+    if (userGeminiResponse && status === 'waiting') {
+      // Clear the user response to prevent re-triggering
+      setUserGeminiResponse("");
+      // Resume bot discussion after a short delay
+      setTimeout(() => {
+        setStatus('bots-talking');
+      }, 1000);
+    }
+  }, [userGeminiResponse, status]);
 
   return (
     <SimulationContext.Provider

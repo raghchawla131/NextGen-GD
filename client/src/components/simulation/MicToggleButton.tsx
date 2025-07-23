@@ -5,15 +5,19 @@ const MicToggleButton = () => {
   const { micOn, setMicOn } = useSimulation();
 
   const toggleMic = () => {
-  setTimeout(() => setMicOn(!micOn), 500); // small delay to allow onresult to fire
-};
+    setMicOn(!micOn);
+  };
 
   return (
     <button
       onClick={toggleMic}
-      className=" bg-blue-400 rounded-full p-2 absolute bottom-0 right-0"
+      className={`rounded-full p-3 transition-all duration-200 absolute bottom-0 right-0 ${
+        micOn 
+          ? 'bg-red-500 hover:bg-red-600 text-white' 
+          : 'bg-blue-500 hover:bg-blue-600 text-white'
+      }`}
     >
-      {micOn ? <Mic className="w-6 h-6 text-foreground" /> : <MicOff className="w-6 h-6 text-foreground" />}
+      {micOn ? <Mic className="w-6 h-6" /> : <MicOff className="w-6 h-6" />}
     </button>
   );
 };

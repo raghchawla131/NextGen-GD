@@ -34,7 +34,7 @@ const Simulation = () => {
       return () => clearTimeout(pauseBeforeReplyTimeout);
     }
     if (status === 'ended') {
-      console.log("gd ended");
+      // GD ended
     }
   }, [status, setStatus]);
 

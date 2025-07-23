@@ -6,28 +6,14 @@ import ParticipantAvatar from './ParticipantAvatar';
 import { useTextToSpeech } from '@/hooks/useTextToSpeech';
 
 const UserManager = () => {
-  const { micOn, transcript, setStatus, userGeminiResponse, setChatHistory } = useSimulation();
+  const { micOn, transcript, userGeminiResponse } = useSimulation();
 
   useSpeechRecognition(micOn);
   useTextToSpeech(userGeminiResponse);
 
-  useEffect(() => {
-    if (!transcript) return;
-    setStatus("waiting");
-  }, [transcript, setStatus]);
-
-  useEffect(() => {
-    if (!userGeminiResponse) return;
-    setChatHistory(prev => [
-      ...prev,
-      { sender: 'user', text: transcript },
-      { sender: 'bot', name: 'Gemini', text: userGeminiResponse }
-    ]);
-  }, [userGeminiResponse]);
-
   return (
     <div className="relative">
-      <ParticipantAvatar />
+      <ParticipantAvatar details={{ id: 0, name: 'You', role: 'Participant' }} />
       <MicToggleButton />
     </div>
   );
