@@ -9,23 +9,45 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+// Dummy users data
+const dummyUsers = [
+  { email: "test@gmail.com", password: "test", name: "test" },
+  { email: "raghavchawla.128@gmail.com", password: "test", name: "Raghav" },
+];
 
 const SignIn = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
     }));
+    setError("");
+    setSuccess("");
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Sign In Data:", formData);
+    setError("");
+    setSuccess("");
+    const user = dummyUsers.find(
+      (u) => u.email === formData.email && u.password === formData.password
+    );
+    if (user) {
+      setSuccess(`Welcome, ${user.name}! Redirecting...`);
+      setTimeout(() => navigate("/"), 1000);
+    } else {
+      setError("Invalid email or password.");
+    }
   };
 
   return (
@@ -81,6 +103,8 @@ const SignIn = () => {
                 required
               />
             </div>
+            {error && <div className="text-red-600 text-sm text-center">{error}</div>}
+            {success && <div className="text-green-600 text-sm text-center">{success}</div>}
           </CardContent>
 
           <CardFooter className="flex flex-col gap-2">

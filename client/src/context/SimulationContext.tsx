@@ -14,8 +14,6 @@ interface SimulationContextType {
   setStatus: React.Dispatch<React.SetStateAction<SimulationContextType['status']>>;
   transcript: string;
   setTranscript: React.Dispatch<React.SetStateAction<string>>;
-  userGeminiResponse: string;
-  setUserGeminiResponse: React.Dispatch<React.SetStateAction<string>>;
   botGeminiResponses: string[];
   setBotGeminiResponses: React.Dispatch<React.SetStateAction<string[]>>;
   chatHistory: ChatMessage[];
@@ -36,7 +34,6 @@ export const SimulationProvider = ({ children, topic, starter }: SimulationProvi
   const [micOn, setMicOn] = useState(false);
   const [status, setStatus] = useState<'idle' | 'waiting' | 'bots-talking' | 'user-speaking' | 'ended'>('idle');
   const [transcript, setTranscript] = useState("");
-  const [userGeminiResponse, setUserGeminiResponse] = useState("");
   const [botGeminiResponses, setBotGeminiResponses] = useState<string[]>([]);
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
 
@@ -61,7 +58,7 @@ export const SimulationProvider = ({ children, topic, starter }: SimulationProvi
     }
   }, [micOn, status]);
 
-  // 📤 Generate Gemini response when mic turns off and transcript is available
+  // 📤 Only add user message to chat history when mic turns off and transcript is available
   useEffect(() => {
     const prevMicOn = prevMicOnRef.current;
     prevMicOnRef.current = micOn;
@@ -71,49 +68,21 @@ export const SimulationProvider = ({ children, topic, starter }: SimulationProvi
         isProcessingUserInputRef.current = true;
         
         // Add user message to chat history immediately
-        setChatHistory(prev => [...prev, { 
-          sender: 'user', 
-          name: 'You', 
-          text: transcript 
-        }]);
-
-        generateFromGemini(transcript)
-          .then(res => {
-            setUserGeminiResponse(res.data.result);
-            
-            // Add Gemini's response to chat history
-            setChatHistory(prev => [...prev, { 
-              sender: 'bot', 
-              name: 'Gemini', 
-              text: res.data.result 
-            }]);
-          })
-          .catch(err => {
-            // Remove the user message if Gemini failed
-            setChatHistory(prev => prev.slice(0, -1));
-          })
-          .finally(() => {
-            isProcessingUserInputRef.current = false;
-            // Clear transcript after processing
-            setTranscript("");
-          });
+        setChatHistory(prev => [
+          ...prev,
+          { sender: 'user' as const, name: 'You', text: transcript }
+        ]);
+        // Trigger bots to respond to user message
+        setTimeout(() => setStatus('bots-talking'), 500);
+        isProcessingUserInputRef.current = false;
+        setTranscript("");
       } else {
         setTranscript("");
       }
     }
   }, [micOn, transcript]);
 
-  // 🚀 Auto-resume bot discussion after user interaction
-  useEffect(() => {
-    if (userGeminiResponse && status === 'waiting') {
-      // Clear the user response to prevent re-triggering
-      setUserGeminiResponse("");
-      // Resume bot discussion after a short delay
-      setTimeout(() => {
-        setStatus('bots-talking');
-      }, 1000);
-    }
-  }, [userGeminiResponse, status]);
+  // Remove userGeminiResponse and related useEffect
 
   return (
     <SimulationContext.Provider
@@ -124,8 +93,6 @@ export const SimulationProvider = ({ children, topic, starter }: SimulationProvi
         setStatus,
         transcript,
         setTranscript,
-        userGeminiResponse,
-        setUserGeminiResponse,
         botGeminiResponses,
         setBotGeminiResponses,
         chatHistory,

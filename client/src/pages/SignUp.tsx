@@ -10,23 +10,46 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
+// Dummy users data (shared in-memory for demo)
+const dummyUsers = [
+  { email: "test@gmail.com", password: "test", name: "test" },
+  { email: "raghavchawla.128@gmail.com", password: "test", name: "raghav" },
+];
+
 const SignUp = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
   });
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
     }));
+    setError("");
+    setSuccess("");
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form Data:", formData);
+    setError("");
+    setSuccess("");
+    const exists = dummyUsers.some((u) => u.email === formData.email);
+    if (exists) {
+      setError("Email already registered. Please sign in or use another email.");
+    } else {
+      dummyUsers.push({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+      });
+      setSuccess("Account created! You can now sign in.");
+      setFormData({ name: "", email: "", password: "" });
+    }
   };
 
   return (
@@ -94,6 +117,8 @@ const SignUp = () => {
                 required
               />
             </div>
+            {error && <div className="text-red-600 text-sm text-center">{error}</div>}
+            {success && <div className="text-green-600 text-sm text-center">{success}</div>}
           </CardContent>
 
           <CardFooter className="flex flex-col gap-2">

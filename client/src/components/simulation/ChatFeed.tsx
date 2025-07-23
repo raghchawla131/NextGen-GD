@@ -1,11 +1,18 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useSimulation } from '@/context/SimulationContext';
 
 const ChatFeed = () => {
   const { chatHistory } = useSimulation();
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+    }
+  }, [chatHistory]);
 
   return (
-    <div className="p-4 space-y-4 max-w-2xl mx-auto h-[88vh] overflow-y-auto bg-black rounded-2xl border border-white">
+    <div ref={containerRef} className="p-4 space-y-4 max-w-2xl mx-auto h-[88vh] overflow-y-auto bg-black rounded-2xl border border-white">
       {chatHistory.map((msg, index) => (
         <div
           key={index}

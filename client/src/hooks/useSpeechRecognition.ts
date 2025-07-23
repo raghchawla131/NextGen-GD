@@ -17,7 +17,7 @@ export const useSpeechRecognition = (isActive: boolean) => {
 
   useEffect(() => {
     if (!("webkitSpeechRecognition" in window)) {
-      console.warn("Speech Recognition not supported");
+      // console.warn("Speech Recognition not supported");
       return;
     }
 
@@ -29,21 +29,21 @@ export const useSpeechRecognition = (isActive: boolean) => {
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
       const result = event.results[0][0].transcript;
-      console.log("🎤 User said:", result);
+      // console.log("🎤 User said:", result);
       transcriptRef.current = result; // Store result temporarily
     };
 
     recognition.onerror = (event: any) => {
-      console.error("❌ Speech recognition error:", event.error);
+      // console.error("❌ Speech recognition error:", event.error);
     };
 
     recognition.onspeechend = () => {
-      console.log("🧘 Speech ended. Stopping...");
+      // console.log("🧘 Speech ended. Stopping...");
       recognition.stop();
     };
 
     recognition.onend = () => {
-      console.log("🛑 Speech recognition ended.");
+      // console.log("🛑 Speech recognition ended.");
       // Finalize and update context transcript after recognition completes
       setTranscript(transcriptRef.current);
     };
